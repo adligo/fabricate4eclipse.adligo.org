@@ -3,7 +3,7 @@
     xmlns:lns="http://www.adligo.org/fabricate/xml/io_v1/library_v1_0.xsd" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
     <pns:dependencies>
-        <lns:project>fabricate.adligo.org</lns:project>
+        <pns:project>fabricate.adligo.org</pns:project>
     </pns:dependencies>
     <pns:stages>
         <pns:stage name="jar" />
