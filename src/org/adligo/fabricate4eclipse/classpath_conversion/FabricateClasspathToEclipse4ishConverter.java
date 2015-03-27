@@ -2,6 +2,7 @@ package org.adligo.fabricate4eclipse.classpath_conversion;
 
 import org.adligo.fabricate.common.util.StringUtils;
 import org.adligo.fabricate.models.common.AttributesOverlay;
+import org.adligo.fabricate.models.common.FabricationMemoryConstants;
 import org.adligo.fabricate.models.common.FabricationRoutineCreationException;
 import org.adligo.fabricate.models.common.I_FabricationMemory;
 import org.adligo.fabricate.models.common.I_FabricationMemoryMutant;
@@ -44,6 +45,7 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   public static final String ECLIPSE_ENV_VAR = "eclipseEnvVariable";
   private I_FabricationRoutine findSrcDirs_;
   private String eclipseEnvVar_;
+  private List<String> platforms_;
   
   @SuppressWarnings("unchecked")
   @Override
@@ -87,7 +89,13 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
       List<I_Ide> children = new ArrayList<I_Ide>(dep.getChildren());
       Iterator<I_Ide> cit = children.iterator();
       boolean addFromDep = false;
-      if (Eclipse4ishClasspathEntryMutant.is4Eclipse(dep)) {
+      String platform = dep.getPlatform();
+      if (platform == null) {
+        platform = "jse";
+      } else {
+        platform = platform.toLowerCase();
+      }
+      if (Eclipse4ishClasspathEntryMutant.is4Eclipse(dep) && platforms_.contains(platform)) {
         addFromDep = true;
       }
       while (cit.hasNext()) {
@@ -179,10 +187,14 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   }
 
   
+  @SuppressWarnings("unchecked")
   @Override
   public boolean setupInitial(I_FabricationMemoryMutant<Object> memory,
       I_RoutineMemoryMutant<Object> routineMemory) throws FabricationRoutineCreationException {
     
+    platforms_ = new ArrayList<String>(
+        (List<String>)
+        memory.get(FabricationMemoryConstants.PLATFORMS));
     findSrcDirs_ = createFindSrcTrait();
     if (!findSrcDirs_.setupInitial(memory, routineMemory)) {
       return false;
@@ -192,9 +204,14 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   }
 
 
+  @SuppressWarnings("unchecked")
   @Override
   public void setup(I_FabricationMemory<Object> memory, I_RoutineMemory<Object> routineMemory)
       throws FabricationRoutineCreationException {
+    
+    platforms_ = new ArrayList<String>(
+        (List<String>)
+        memory.get(FabricationMemoryConstants.PLATFORMS));
     
     findSrcDirs_ = createFindSrcTrait();
     findSrcDirs_.setup(memory, routineMemory);
