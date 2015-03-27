@@ -62,15 +62,20 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
       Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant();
       toAdd.setKind("src");
       toAdd.setPath(relDir);
-      eclipseEntries.add(toAdd);
+      if (!eclipseEntries.contains(toAdd)) {
+        eclipseEntries.add(toAdd);
+      }
     }
     
-    List<I_Parameter> ides = ao.getAllAttributes(attribConstants_.getIde());
+    List<I_Parameter> ides = ao.getAttributes(attribConstants_.getIde());
     for (I_Parameter ide: ides) {
       if ("eclipse".equalsIgnoreCase(ide.getValue())) {
         List<I_Parameter> children = ide.getChildren();
         for (I_Parameter child: children) {
-          eclipseEntries.add(new Eclipse4ishClasspathEntryMutant(child));
+          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(child);
+          if (!eclipseEntries.contains(toAdd)) {
+            eclipseEntries.add(toAdd);
+          }
         }
       }
     }
@@ -81,30 +86,50 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
       
       List<I_Ide> children = new ArrayList<I_Ide>(dep.getChildren());
       Iterator<I_Ide> cit = children.iterator();
-      boolean addFromDep = true;
+      boolean addFromDep = false;
+      if (Eclipse4ishClasspathEntryMutant.is4Eclipse(dep)) {
+        addFromDep = true;
+      }
       while (cit.hasNext()) {
         I_Ide ide = cit.next();
         if ("eclipse".equalsIgnoreCase(ide.getName())) {
           List<I_Parameter> ideChildren = ide.getChildren();
+          if (ideChildren.size() >= 1) {
+            addFromDep = false;
+          }
           for (I_Parameter child: ideChildren) {
-            eclipseEntries.add(new Eclipse4ishClasspathEntryMutant(child));
+            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(child);
+            if (!eclipseEntries.contains(toAdd)) {
+              eclipseEntries.add(toAdd);
+            }
           }
         }
       }
       if (addFromDep) {
         String path = localRepo.getArtifactPath(dep);
         if (StringUtils.isEmpty(eclipseEnvVar_)) {
-          eclipseEntries.add(new Eclipse4ishClasspathEntryMutant(dep, path));
+          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
+          if (!eclipseEntries.contains(toAdd)) {
+            eclipseEntries.add(toAdd);
+          }
         } else {
-          path = eclipseEnvVar_ + path.substring(localRepoPath.length(), path.length());
-          eclipseEntries.add(new Eclipse4ishClasspathEntryMutant(dep, path));
+          if (path != null) {
+            path = eclipseEnvVar_ + path.substring(localRepoPath.length(), path.length());
+          }
+          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
+          if (!eclipseEntries.contains(toAdd)) {
+            eclipseEntries.add(toAdd);
+          }
         }
       }
     }
     
     List<I_ProjectDependency> pdeps = project_.getProjectDependencies();
     for (I_ProjectDependency pd: pdeps) {
-      eclipseEntries.add(new Eclipse4ishClasspathEntryMutant(pd));
+      Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(pd);
+      if (!eclipseEntries.contains(toAdd)) {
+        eclipseEntries.add(toAdd);
+      }
     }
     
     StringBuilder sb = new StringBuilder();
