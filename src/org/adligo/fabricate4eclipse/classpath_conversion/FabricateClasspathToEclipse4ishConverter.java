@@ -35,7 +35,7 @@ import java.util.List;
  *
  */
 public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutine
-  implements I_FabricationRoutine {
+  implements I_FabricationRoutine, I_ProjectAware, I_FabricateAware {
   /**
    * optional command line parameter which
    * tells this class to use the value as the eclipse 
