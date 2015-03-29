@@ -45,6 +45,7 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   public static final String ECLIPSE_ENV_VAR = "eclipseEnvVariable";
   private I_FabricationRoutine findSrcDirs_;
   private String eclipseEnvVar_;
+  boolean windows_ = false;
   private List<String> platforms_;
   
   @SuppressWarnings("unchecked")
@@ -122,7 +123,7 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
           }
         } else {
           if (path != null) {
-            path = eclipseEnvVar_ + path.substring(localRepoPath.length(), path.length());
+            path = eclipseEnvVar_ + "/" + path.substring(localRepoPath.length(), path.length());
           }
           Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
           if (!eclipseEntries.contains(toAdd)) {
@@ -159,7 +160,11 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
       sb.append("\" ");
       
       sb.append("path=\"");
-      sb.append(e.getPath());
+      String path = e.getPath();
+      if (windows_) {
+        path = getEclipsePathFromWindowsPath(path);
+      } 
+      sb.append(path);
       sb.append("\"/>");
       sb.append(system_.lineSeparator());
       
@@ -186,12 +191,32 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
     }
   }
 
+
+  private String getEclipsePathFromWindowsPath(String path) {
+    //path is a real windows path, but eclipse only uses / in it's .classpath files
+    StringBuilder sbPath = new StringBuilder();
+    char [] chars = path.toCharArray();
+    for (int i = 0; i < chars.length; i++) {
+      char c = chars[i];
+      if (c == '\\') {
+        sbPath.append('/');
+      } else {
+        sbPath.append(c);
+      }
+    }
+    path = sbPath.toString();
+    return path;
+  }
+
   
   @SuppressWarnings("unchecked")
   @Override
   public boolean setupInitial(I_FabricationMemoryMutant<Object> memory,
       I_RoutineMemoryMutant<Object> routineMemory) throws FabricationRoutineCreationException {
     
+    if ("\\".equals(files_.getNameSeparator())) {
+      windows_ = true;
+    }
     platforms_ = new ArrayList<String>(
         (List<String>)
         memory.get(FabricationMemoryConstants.PLATFORMS));
@@ -209,6 +234,9 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   public void setup(I_FabricationMemory<Object> memory, I_RoutineMemory<Object> routineMemory)
       throws FabricationRoutineCreationException {
     
+    if ("\\".equals(files_.getNameSeparator())) {
+      windows_ = true;
+    }
     platforms_ = new ArrayList<String>(
         (List<String>)
         memory.get(FabricationMemoryConstants.PLATFORMS));
