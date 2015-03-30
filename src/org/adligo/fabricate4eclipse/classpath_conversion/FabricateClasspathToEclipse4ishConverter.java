@@ -96,38 +96,40 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
       } else {
         platform = platform.toLowerCase();
       }
-      if (Eclipse4ishClasspathEntryMutant.is4Eclipse(dep) && platforms_.contains(platform)) {
-        addFromDep = true;
-      }
-      while (cit.hasNext()) {
-        I_Ide ide = cit.next();
-        if ("eclipse".equalsIgnoreCase(ide.getName())) {
-          List<I_Parameter> ideChildren = ide.getChildren();
-          if (ideChildren.size() >= 1) {
-            addFromDep = false;
-          }
-          for (I_Parameter child: ideChildren) {
-            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(child);
-            if (!eclipseEntries.contains(toAdd)) {
-              eclipseEntries.add(toAdd);
+      if (platforms_.contains(platform)) {
+        if (Eclipse4ishClasspathEntryMutant.is4Eclipse(dep)) {
+          addFromDep = true;
+        }
+        while (cit.hasNext()) {
+          I_Ide ide = cit.next();
+          if ("eclipse".equalsIgnoreCase(ide.getName())) {
+            List<I_Parameter> ideChildren = ide.getChildren();
+            if (ideChildren.size() >= 1) {
+              addFromDep = false;
+            }
+            for (I_Parameter child: ideChildren) {
+              Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(child);
+              if (!eclipseEntries.contains(toAdd)) {
+                eclipseEntries.add(toAdd);
+              }
             }
           }
         }
-      }
-      if (addFromDep) {
-        String path = localRepo.getArtifactPath(dep);
-        if (StringUtils.isEmpty(eclipseEnvVar_)) {
-          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
-          if (!eclipseEntries.contains(toAdd)) {
-            eclipseEntries.add(toAdd);
-          }
-        } else {
-          if (path != null) {
-            path = eclipseEnvVar_ + "/" + path.substring(localRepoPath.length(), path.length());
-          }
-          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
-          if (!eclipseEntries.contains(toAdd)) {
-            eclipseEntries.add(toAdd);
+        if (addFromDep) {
+          String path = localRepo.getArtifactPath(dep);
+          if (StringUtils.isEmpty(eclipseEnvVar_)) {
+            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
+            if (!eclipseEntries.contains(toAdd)) {
+              eclipseEntries.add(toAdd);
+            }
+          } else {
+            if (path != null) {
+              path = eclipseEnvVar_ + "/" + path.substring(localRepoPath.length(), path.length());
+            }
+            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
+            if (!eclipseEntries.contains(toAdd)) {
+              eclipseEntries.add(toAdd);
+            }
           }
         }
       }
