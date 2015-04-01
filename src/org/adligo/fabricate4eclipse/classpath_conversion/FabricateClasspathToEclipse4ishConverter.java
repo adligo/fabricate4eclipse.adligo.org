@@ -217,7 +217,7 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
     if (!findSrcDirs_.setupInitial(memory, routineMemory)) {
       return false;
     }
-    setEclipseEnvVar();
+    setEclipseEnvVar(true);
     return super.setupInitial(memory, routineMemory);
   }
 
@@ -236,7 +236,7 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
     
     findSrcDirs_ = createFindSrcTrait();
     findSrcDirs_.setup(memory, routineMemory);
-    setEclipseEnvVar();
+    setEclipseEnvVar(false);
     super.setup(memory, routineMemory);
   }
   
@@ -247,18 +247,19 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
     return ret;
   }
   
-  private void setEclipseEnvVar() {
+  private void setEclipseEnvVar(boolean initial) {
     if (system_.hasArg(ECLIPSE_ENV_VAR)) {
       eclipseEnvVar_ = system_.getArgValue(ECLIPSE_ENV_VAR);
     } else {
-      String message = sysMessages_.getTheFollowingCommandLineArgumentWasNotProvidedForCommandXUsingDefaultY();
-      message = message.replaceAll("<X/>", brief_.getName());
-      message = message.replaceAll("<Y/>", "FAB_REPO");
-      message = message + system_.lineSeparator() + ECLIPSE_ENV_VAR;
-      log_.println(message);
+      if (initial) {
+        String message = sysMessages_.getTheFollowingCommandLineArgumentWasNotProvidedForCommandXUsingDefaultY();
+        message = message.replaceAll("<X/>", brief_.getName());
+        message = message.replaceAll("<Y/>", "FAB_REPO");
+        message = message + system_.lineSeparator() + ECLIPSE_ENV_VAR;
+        log_.println(message);
+      }
       eclipseEnvVar_ = "FAB_REPO";
     }
-    
     if (StringUtils.isEmpty(eclipseEnvVar_)) {
       String message = sysMessages_.getTheFollowingCommandLineArgumentIsRequiredForCommandX();
       
