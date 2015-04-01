@@ -116,20 +116,11 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
           }
         }
         if (addFromDep) {
-          String path = localRepo.getArtifactPath(dep);
-          if (StringUtils.isEmpty(eclipseEnvVar_)) {
-            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
-            if (!eclipseEntries.contains(toAdd)) {
-              eclipseEntries.add(toAdd);
-            }
-          } else {
-            if (path != null) {
-              path = eclipseEnvVar_ + "/" + path.substring(localRepoPath.length(), path.length());
-            }
-            Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
-            if (!eclipseEntries.contains(toAdd)) {
-              eclipseEntries.add(toAdd);
-            }
+          String aPath = localRepo.getArtifactPath(dep);
+          String path = eclipseEnvVar_ + "/" + aPath.substring(localRepoPath.length(), aPath.length());
+          Eclipse4ishClasspathEntryMutant toAdd = new Eclipse4ishClasspathEntryMutant(dep, path);
+          if (!eclipseEntries.contains(toAdd)) {
+            eclipseEntries.add(toAdd);
           }
         }
       }
@@ -257,9 +248,24 @@ public class FabricateClasspathToEclipse4ishConverter extends ProjectAwareRoutin
   }
   
   private void setEclipseEnvVar() {
-    String value = system_.getArgValue(ECLIPSE_ENV_VAR);
-    if (!StringUtils.isEmpty(value)) {
-      eclipseEnvVar_ = value;
+    if (system_.hasArg(ECLIPSE_ENV_VAR)) {
+      eclipseEnvVar_ = system_.getArgValue(ECLIPSE_ENV_VAR);
+    } else {
+      String message = sysMessages_.getTheFollowingCommandLineArgumentWasNotProvidedForCommandXUsingDefaultY();
+      message = message.replaceAll("<X/>", brief_.getName());
+      message = message.replaceAll("<Y/>", "FAB_REPO");
+      message = message + system_.lineSeparator() + ECLIPSE_ENV_VAR;
+      log_.println(message);
+      eclipseEnvVar_ = "FAB_REPO";
     }
+    
+    if (StringUtils.isEmpty(eclipseEnvVar_)) {
+      String message = sysMessages_.getTheFollowingCommandLineArgumentIsRequiredForCommandX();
+      
+      message = message.replaceAll("<X/>", brief_.getName());
+      message = message.replaceAll("<Y/>", "FAB_REPO");
+      message = message + system_.lineSeparator() + ECLIPSE_ENV_VAR;
+      throw new IllegalStateException(message);
+    } 
   }
 }
